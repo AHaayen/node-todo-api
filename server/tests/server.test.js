@@ -171,7 +171,7 @@ describe('PATCH /todos/:id', () => {
             .patch(`/todos/${hexID}`)
             .send({
                 completed: false,
-                text: text
+                text
             })
             .expect(200)
             .expect((res) => {
