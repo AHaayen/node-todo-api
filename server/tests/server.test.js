@@ -184,7 +184,7 @@ describe('PATCH /todos/:id', () => {
     it('should return 404 if todo not found', (done) =>{ 
 
         request(app)
-            .get(`/todos/123abc`)
+            .patch(`/todos/123abc`)
             .expect(404)
             .end(done);
     })
