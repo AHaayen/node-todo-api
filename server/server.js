@@ -41,13 +41,16 @@ app.get('/todos', authenticate, (req, res) => {
 //GET /todos/1234523
 
 // :id = URL Parameters
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
     var id = req.params.id;
     if (!ObjectID.isValid(id)) {
         return res.status(404).send();
     };
 
-    Todo.findById(id).then((todo) => {
+    Todo.findOne({
+        _id: id,
+        _creator: req.user._id
+    }).then((todo) => {
         if (!todo) {
             return res.status(404).send();
         }
@@ -59,14 +62,17 @@ app.get('/todos/:id', (req, res) => {
     });
 });
 
-app.delete('/todos/:id', (req, res) => {
-    var ID = req.params.id;      // get the ID.                                           
+app.delete('/todos/:id', authenticate, (req, res) => {
+    var id = req.params.id;      // get the ID.                                           
     
-    if (!ObjectID.isValid(ID)) { // validate the id -> not valid? return 404
+    if (!ObjectID.isValid(id)) { // validate the id -> not valid? return 404
         return res.status(404).send();
     };
 
-    Todo.findByIdAndRemove(ID).then((todo) => {
+    Todo.findOneAndRemove({
+        _id: id,
+        _creator: req.user._id
+    }).then((todo) => {
         if(!todo){
             return res.status(404).send();
         }
@@ -79,7 +85,7 @@ app.delete('/todos/:id', (req, res) => {
 
 // Pacth is what u use when u wanna update resource
 
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
     var id = req.params.id;
     var body = _.pick(req.body, ['text', 'completed']); 
 
@@ -94,7 +100,10 @@ app.patch('/todos/:id', (req, res) => {
         body.completedAt = null;
     }
 
-    Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+    Todo.findOneAndUpdate({
+        _id: id,
+        _creator: req.user._id
+    }, {$set: body}, {new: true}).then((todo) => {
         if(!todo) {
             return res.status(404).send();
         }
